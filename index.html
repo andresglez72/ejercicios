@@ -163,15 +163,21 @@ document.body.addEventListener("click", () => {
 
 },{once:true});
 
-document
+  document
   .getElementById("btnReset")
-  .addEventListener("click", () => {
+  .addEventListener("click", async () => {
+
+    if(audioCtx.state === "suspended"){
+      await audioCtx.resume();
+    }
 
     generarValores();
 
     drawBars();
 
-    ordenar();
+    await ordenar();
+
+  });
 
   });
 
