@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Andre Sort</title>
+
+<style>
+
+body{
+  margin:0;
+  background:#111;
+  color:white;
+  font-family:Arial,sans-serif;
+  text-align:center;
+}
+
+h1{
+  margin-top:30px;
+  letter-spacing:4px;
+}
+
+button{
+  padding:10px 20px;
+  margin-bottom:20px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button:hover{
+  opacity:0.9;
+}
+
+#bars{
+  height:400px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:4px;
+  padding:20px;
+}
+
+.bar{
+  width:18px;
+  background:#10b981;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>INSERTION SORT</h1>
+
+<button id="btnReset">Nuevo Arreglo</button>
+
+<div id="bars"></div>
+
+<script>
+
+const barsContainer = document.getElementById("bars");
+
+const values = [];
+
+function generarValores(){
+
+  values.length = 0;
+
+  for(let i = 0; i < 20; i++){
+
+    values.push(
+      Math.floor(Math.random() * 300) + 50
+    );
+
+  }
+
+}
+
+function drawBars(){
+
+  barsContainer.innerHTML = "";
+
+  values.forEach(value => {
+
+    const bar = document.createElement("div");
+
+    bar.className = "bar";
+
+    bar.style.height = value + "px";
+
+    barsContainer.appendChild(bar);
+
+  });
+
+}
+
+function sleep(ms){
+
+  return new Promise(resolve => setTimeout(resolve, ms));
+
+}
+
+const audioCtx = new AudioContext();
+
+function beep(freq){
+
+  const osc = audioCtx.createOscillator();
+
+  const gain = audioCtx.createGain();
+
+  osc.frequency.value = freq;
+
+  osc.type = "sine";
+
+  osc.connect(gain);
+
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+
+  osc.stop(audioCtx.currentTime + 0.05);
+
+}
+
+async function ordenar(){
+
+  for(let vuelta = 0; vuelta < values.length; vuelta++){
+
+    for(let i = 1; i < values.length; i++){
+
+      if(values[i - 1] > values[i]){
+
+        let temp = values[i - 1];
+
+        values[i - 1] = values[i];
+
+        values[i] = temp;
+
+        beep(values[i] * 3);
+
+        drawBars();
+
+        await sleep(100);
+
+      }
+
+    }
+
+  }
+
+}
+
+document.body.addEventListener("click", () => {
+
+  if(audioCtx.state === "suspended"){
+
+    audioCtx.resume();
+
+  }
+
+},{once:true});
+
+document
+  .getElementById("btnReset")
+  .addEventListener("click", () => {
+
+    generarValores();
+
+    drawBars();
+
+    ordenar();
+
+  });
+
+generarValores();
+
+drawBars();
+
+ordenar();
+
+</script>
+
+</body>
+</html>
