@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Andre Sort</title>
 
 <style>
-
 body{
   margin:0;
   background:#111;
@@ -29,10 +27,6 @@ button{
   font-weight:bold;
 }
 
-button:hover{
-  opacity:0.9;
-}
-
 #bars{
   height:400px;
   display:flex;
@@ -46,9 +40,7 @@ button:hover{
   width:18px;
   background:#10b981;
 }
-
 </style>
-
 </head>
 
 <body>
@@ -60,131 +52,100 @@ button:hover{
 <div id="bars"></div>
 
 <script>
-
 const barsContainer = document.getElementById("bars");
+const btnReset = document.getElementById("btnReset");
 
-const values = [];
+let values = [];
+let audioCtx = null;
+let ordenando = false;
 
 function generarValores(){
-
-  values.length = 0;
+  values = [];
 
   for(let i = 0; i < 20; i++){
-
-    values.push(
-      Math.floor(Math.random() * 300) + 50
-    );
-
+    values.push(Math.floor(Math.random() * 300) + 50);
   }
-
 }
 
 function drawBars(){
-
   barsContainer.innerHTML = "";
 
   values.forEach(value => {
-
     const bar = document.createElement("div");
-
     bar.className = "bar";
-
     bar.style.height = value + "px";
-
     barsContainer.appendChild(bar);
-
   });
-
 }
 
 function sleep(ms){
-
   return new Promise(resolve => setTimeout(resolve, ms));
-
 }
 
-const audioCtx = new AudioContext();
+function iniciarAudio(){
+  if(audioCtx === null){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  if(audioCtx.state === "suspended"){
+    audioCtx.resume();
+  }
+}
 
 function beep(freq){
+  if(audioCtx === null) return;
 
   const osc = audioCtx.createOscillator();
-
   const gain = audioCtx.createGain();
 
   osc.frequency.value = freq;
-
   osc.type = "sine";
 
-  osc.connect(gain);
+  gain.gain.value = 0.08;
 
+  osc.connect(gain);
   gain.connect(audioCtx.destination);
 
   osc.start();
-
   osc.stop(audioCtx.currentTime + 0.05);
-
 }
 
 async function ordenar(){
+  ordenando = true;
+  btnReset.disabled = true;
 
   for(let vuelta = 0; vuelta < values.length; vuelta++){
-
     for(let i = 1; i < values.length; i++){
-
       if(values[i - 1] > values[i]){
-
         let temp = values[i - 1];
-
         values[i - 1] = values[i];
-
         values[i] = temp;
 
         beep(values[i] * 3);
-
         drawBars();
 
         await sleep(100);
-
       }
-
     }
-
   }
 
+  btnReset.disabled = false;
+  ordenando = false;
 }
 
-document.body.addEventListener("click", () => {
+btnReset.addEventListener("click", async () => {
+  if(ordenando) return;
 
-  if(audioCtx.state === "suspended"){
+  iniciarAudio();
 
-    audioCtx.resume();
+  generarValores();
+  drawBars();
 
-  }
-
-},{once:true});
-
-document
-  .getElementById("btnReset")
-  .addEventListener("click", async () => {
-
-    if(audioCtx.state === "suspended"){
-      await audioCtx.resume();
-    }
-
-    generarValores();
-
-    drawBars();
-
-    await ordenar();
-
-  });
+  await ordenar();
+});
 
 generarValores();
-
 drawBars();
-
-
-
 </script>
 
 </body>
